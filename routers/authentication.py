@@ -5,7 +5,8 @@ from data_utility.userdata import UserData, UserDataLogin
 from starlette.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-
+import uuid
+import json
 
 router = APIRouter() # Defines application to be a router for linking
 
@@ -36,7 +37,8 @@ def CheckUserEmail(useremail, session):
 async def RegisterUser(userdata: UserData) -> JSONResponse:
     with sessionLocal() as session:
         if CheckUserEmail(userdata.email, session):
-            user = User(
+            user = User (
+                id = str(uuid.uuid4()),
                 username = userdata.dict().get("username"),
                 user_email = userdata.dict().get("email"),
                 user_password = userdata.dict().get("password")
@@ -45,7 +47,7 @@ async def RegisterUser(userdata: UserData) -> JSONResponse:
             session.add(user)
             session.commit()
             return JSONResponse(status_code=200, 
-                content = {"message": "Sucessfully registered.", "registered":True})
+                content = {"message": "Sucessfully registered.", "registered":True, "user":json.dumps(user)})
         #Case where user's email already exists, we return false
         return JSONResponse(status_code=401, 
         content = {"message": "Email already exists!", "registered":False})
