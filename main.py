@@ -1,12 +1,14 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from routers import authentication
 from servconf.origins import origins
 from database.databaseConnection import engine, sessionLocal, base
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 app = FastAPI()
 
 app.include_router(authentication.router)
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -20,6 +22,5 @@ app.add_middleware(
 @app.get("/")
 async def root():
   return {"message": "Welcome to VintageClothing!"}
-
 
 base.metadata.create_all(bind=engine)
