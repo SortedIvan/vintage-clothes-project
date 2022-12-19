@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from routers import authentication, item_manager
+from routers import authentication, user_item_manager
 from servconf.origins import origins
 from database.databaseConnection import engine, sessionLocal, base
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -9,7 +9,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 app = FastAPI()
 
 app.include_router(authentication.router)
-app.include_router(item_manager.router)
+app.include_router(user_item_manager.router)
 
 app.add_middleware(
     CORSMiddleware,

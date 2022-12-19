@@ -73,6 +73,13 @@ async def GetAllUserItems(user_id, params: Params = Depends()):
         else:
             return JSONResponse(status_code=200, content = {"message":"No items to show!"})
 
-
-
+@router.delete("/api/delete-item/{item_id}")
+async def DeleteItem(item_id):
+    with sessionLocal() as session:
+        item = session.query(Item).filter(Item.id == item_id).first()
+        if item != None:
+            session.delete(item)
+            session.commit()
+            return JSONResponse(status_code=200, content = {"message":"Item with id {item_id} has been deleted successfully!"})
+        return JSONResponse(status_code=406, content = {"message":"Item not deleted!"})
 
