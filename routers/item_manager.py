@@ -3,14 +3,10 @@ from database.databaseConnection import sessionLocal
 from models.item import Item
 from starlette.responses import JSONResponse
 from django.http import JsonResponse
-from data_utility.itemdata import ItemData, ItemObject, ItemObj
+from data_utility.itemdata import ItemData, ItemObj
 import datetime
 import uuid
-from fastapi_pagination import Page, add_pagination, paginate, Params
-import json
-
-
-
+from fastapi_pagination import Page, paginate, Params
 
 router = APIRouter()
 
@@ -54,26 +50,29 @@ async def CreateNewItem(itemData: ItemData) -> JsonResponse:
 async def GetAllUserItems(user_id, params: Params = Depends()):
     with sessionLocal() as session:
         items = session.query(Item).filter(Item.user_id == user_id).all()
+        if items != []:
+            all_items_json = []
+            for i in range(len(items)):
+                item_data = {
+                    "user_id": items[i].user_id,
+                    "item_name": items[i].item_name,
+                    "item_price": items[i].item_price,
+                    "item_category": items[i].item_category,
+                    "item_brand": items[i].item_brand,
+                    "item_size":items[i].item_size,
+                    "item_color": items[i].item_color,
+                    "item_condition":items[i].item_condition,
+                    "upload_date": items[i].upload_date,
+                    "item_hidden": items[i].item_hidden,
+                    "item_favourites": items[i].item_favourites,
+                    "item_boosted":items[i].item_boosted
+                }
+                item_obj = ItemObj(**item_data)
+                all_items_json.append(item_obj)
+            return paginate(all_items_json, params)
+        else:
+            return JSONResponse(status_code=200, content = {"message":"No items to show!"})
 
-        all_items_json = []
-        for i in range(len(items)):
-            item_data = {
-                "user_id": items[i].user_id,
-                "item_name": items[i].item_name,
-                "item_price": items[i].item_price,
-                "item_category": items[i].item_category,
-                "item_brand": items[i].item_brand,
-                "item_size":items[i].item_size,
-                "item_color": items[i].item_color,
-                "item_condition":items[i].item_condition,
-                "upload_date": items[i].upload_date,
-                "item_hidden": items[i].item_hidden,
-                "item_favourites": items[i].item_favourites,
-                "item_boosted":items[i].item_boosted
-            }
-            
-            item_obj = ItemObj(**item_data)
-            all_items_json.append(item_obj)
-    return paginate(all_items_json, params)
+
 
 
