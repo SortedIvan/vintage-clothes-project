@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import date, datetime
 
 class ItemData(BaseModel):
     user_id: str
@@ -27,3 +28,18 @@ class ItemObject(object):
     self.item_hidden = item_hidden
     self.item_favourites = item_favourites
     self.item_boosted = item_boosted
+
+
+class ItemObj(BaseModel):
+    user_id: str
+    item_name: str
+    item_price: str
+    item_category: str
+    item_brand: str
+    item_size: int
+    item_color: str
+    item_condition: str
+    upload_date: date
+    item_hidden: bool
+    item_favourites: int
+    item_boosted: bool
