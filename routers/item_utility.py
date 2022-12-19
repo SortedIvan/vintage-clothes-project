@@ -82,7 +82,7 @@ async def DeleteItem(item_id):
             return JSONResponse(status_code=200, content = {"message":"Item with id {item_id} has been deleted successfully!"})
         return JSONResponse(status_code=406, content = {"message":"Item not deleted!"})
 
-@router.put("/api/favourite-item/{item_id}")
+@router.put("/api/favourite-item")
 async def FavouriteItem(item_id, user_id):
     with sessionLocal() as session:
         item = session.query(Item).filter(Item.id == item_id).first()
@@ -99,6 +99,17 @@ async def FavouriteItem(item_id, user_id):
 
             return JSONResponse(status_code=200, content = {"message": "Item has been favourited successfuly"})
         return JSONResponse(status_code=406, content= {"message": "No such item!"})
-        
+
+@router.put("/api/unfavourite-item")
+async def FavouriteItem(item_id, user_id):
+    with sessionLocal() as session:
+        item = session.query(Item).filter(Item.id == item_id).first()
+        if item != None:
+            already_favourite = session.query(Favourite).filter(Favourite.item_id == item_id).filter(Favourite.user_id == user_id).first()
+            item.item_favourites -= 1
+            session.delete(already_favourite)
+            session.commit()
+            return JSONResponse(status_code=200, content = {"message": "Item has been unfavourited successfuly"})
+        return JSONResponse(status_code=406, content= {"message": "No such item!"})
             
 
