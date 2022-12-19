@@ -56,9 +56,14 @@ async def RegisterUser(userdata: UserData) -> JSONResponse:
 
 
 @router.post("/api/login-user")
-async def RegisterUser(userdata: UserDataLogin) -> JSONResponse:
+async def LoginUser(userdata: UserDataLogin) -> JSONResponse:
     with sessionLocal() as session:
         user = session.query(User).filter(User.user_email == userdata.email).first()
+
+        if user is None:
+            return JSONResponse(status_code=401, 
+            content = {"message": "Unsuccesful login.", "logged_in":False})
+
         if user.user_password == userdata.password:
             #TODO: De-salt password 
             return JSONResponse(status_code=200, 
