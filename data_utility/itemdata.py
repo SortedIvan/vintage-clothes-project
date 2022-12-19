@@ -8,4 +8,5 @@ class ItemData(BaseModel):
     item_brand: str
     item_color: str 
     item_condition: str 
-    item_boosted: bool 
+    item_boosted: bool
+    item_size: str 

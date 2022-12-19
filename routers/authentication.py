@@ -47,7 +47,9 @@ async def RegisterUser(userdata: UserData) -> JSONResponse:
             session.add(user)
             session.commit()
             return JSONResponse(status_code=200, 
-                content = {"message": "Sucessfully registered.", "registered":True, "user":json.dumps(user)})
+                content = {"message": "Sucessfully registered.", "registered":True, "username":userdata.dict().get("username"),
+                "user_email": userdata.dict().get("email")})
+
         #Case where user's email already exists, we return false
         return JSONResponse(status_code=401, 
         content = {"message": "Email already exists!", "registered":False})
