@@ -4,18 +4,12 @@ from models.item import Item
 from starlette.responses import JSONResponse
 from django.http import JsonResponse
 from data_utility.itemdata import ItemData, ItemObj
+from models.favourite import Favourite
 import datetime
 import uuid
 from fastapi_pagination import Page, paginate, Params
 
 router = APIRouter()
-
-
-def obj_dict(obj):
-    if isinstance(obj, datetime.date):
-        return dict(year=obj.year, month=obj.month, day=obj.day)
-    else:
-        return obj.__dict__
 
 @router.post("/api/create-new-listing")
 async def CreateNewItem(itemData: ItemData) -> JsonResponse:
@@ -46,6 +40,8 @@ async def CreateNewItem(itemData: ItemData) -> JsonResponse:
         "item_size": itemData.dict().get("item_size"), "item_condition": itemData.dict().get("item_condition"), "upload_date": date.strftime("%d/%m/%Y"),
         "item_hidden": False})
 
+#Query all items where user_id is present
+#Paginate them, where max is 100 items per page and minimum 1 page
 @router.get("/api/get-all-user-items", response_model=Page[ItemObj])
 async def GetAllUserItems(user_id, params: Params = Depends()):
     with sessionLocal() as session:
@@ -73,6 +69,9 @@ async def GetAllUserItems(user_id, params: Params = Depends()):
         else:
             return JSONResponse(status_code=200, content = {"message":"No items to show!"})
 
+
+# Delete item based on the provided item_id
+# NULL check if item is none -> not deleted
 @router.delete("/api/delete-item/{item_id}")
 async def DeleteItem(item_id):
     with sessionLocal() as session:
@@ -82,4 +81,24 @@ async def DeleteItem(item_id):
             session.commit()
             return JSONResponse(status_code=200, content = {"message":"Item with id {item_id} has been deleted successfully!"})
         return JSONResponse(status_code=406, content = {"message":"Item not deleted!"})
+
+@router.put("/api/favourite-item/{item_id}")
+async def FavouriteItem(item_id, user_id):
+    with sessionLocal() as session:
+        item = session.query(Item).filter(Item.id == item_id).first()
+        if item != None:
+            already_favourite = session.query(Favourite).filter(Favourite.item_id == item_id).filter(Favourite.user_id == user_id).first()
+            if already_favourite is not None:
+                print(already_favourite)
+                return JSONResponse(status_code=200, content = {"message": "Item has already been favourited!"})
+
+            item.item_favourites += 1
+            favourite = Favourite(user_id = user_id, item_id = item_id)
+            session.add(favourite)
+            session.commit()
+
+            return JSONResponse(status_code=200, content = {"message": "Item has been favourited successfuly"})
+        return JSONResponse(status_code=406, content= {"message": "No such item!"})
+        
+            
 
